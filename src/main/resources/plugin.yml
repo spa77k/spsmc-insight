@@ -1,0 +1,30 @@
+name: SPSMCInsight
+version: ${project.version}
+main: dev.spa.insight.InsightPlugin
+api-version: '1.20'
+author: spa
+description: プレイヤーの定着と離脱を分析するためのデータ収集プラグイン
+softdepend:
+  - CoreProtect
+  - Jobs
+  - LuckPerms
+  - McLevel
+  - ContractBoard
+  - QuickShop-Hikari
+  - GriefPrevention
+  - Bolt
+  - Essentials
+  - Vault
+  - Multiverse-Core
+  - DiscordSRV
+  - MCAuth
+  - WorldGuard
+commands:
+  insight:
+    description: 分析データの出力と状態確認
+    usage: /insight <export|backfill|status|flush|sources|help>
+    permission: insight.admin
+permissions:
+  insight.admin:
+    description: SPSMCInsightの管理コマンド
+    default: op

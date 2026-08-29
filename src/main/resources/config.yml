@@ -1,0 +1,69 @@
+# SPSMCInsight の設定。値を変えたらサーバーを再起動する。
+
+# メモリ上のカウンタをSQLiteへ書き出す間隔（秒）。
+# 高頻度イベントを毎回書き込まないための緩衝時間。
+flush-interval-seconds: 60
+
+# 最後の自発操作からこの秒数以内をアクティブ扱いにする。
+# McLevel の ActivityTracker と同じ 60 秒を既定にしている。
+active-timeout-seconds: 60
+
+# 週次エクスポートの自動実行。週の区切りはJSTの月曜0時（ISO週）。
+export:
+  enabled: true
+  # 前週分を書き出す時刻（サーバーのローカル時刻の時・分）。
+  hour: 0
+  minute: 30
+  # 出力先。プラグインのデータフォルダからの相対パス。
+  directory: exports
+  # 1ファイルの目安上限（MB）。超えた場合は summary.json に警告を残す。
+  file-size-warn-mb: 48
+
+# 生ログの保持。閾値より古い明細は日次集計へ畳んでから削除する。
+retention:
+  enabled: true
+  # 明細（sessions / session_counters）を残す日数。
+  detail-days: 365
+
+# 起動時に一度だけ実行する過去データの遡及。
+backfill:
+  enabled: true
+  # CoreProtect のデータベースから過去の活動日を再構成する。
+  use-coreprotect: true
+  # サーバーの stats/*.json と advancements/*.json を読む。
+  use-vanilla-stats: true
+  # EssentialsX の userdata を読む。
+  use-essentials: true
+
+# 外部プラグイン連携。false にしたソースは unavailable として扱う。
+sources:
+  coreprotect: true
+  jobs: true
+  luckperms: true
+  mclevel: true
+  contractboard: true
+  quickshop: true
+  griefprevention: true
+  bolt: true
+  essentials: true
+  vault: true
+  discordsrv: true
+  mcauth: true
+  worldguard: true
+  multiverse: true
+
+# 記録するイベント。負荷が問題になった項目だけ false にできる。
+tracking:
+  movement: true
+  blocks: true
+  combat: true
+  chat: true
+  commands: true
+  inventory: true
+  crafting: true
+  advancements: true
+  deaths: true
+  world-changes: true
+  interactions: true
+  # マテリアル別の内訳を上位いくつまで残すか。0で内訳を残さない。
+  material-breakdown-top: 40
