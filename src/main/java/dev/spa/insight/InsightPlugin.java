@@ -3,6 +3,7 @@ package dev.spa.insight;
 import dev.spa.insight.backfill.BackfillService;
 import dev.spa.insight.command.InsightCommand;
 import dev.spa.insight.export.ExportService;
+import dev.spa.insight.jobs.JobsAudit;
 import dev.spa.insight.listener.BlockListener;
 import dev.spa.insight.listener.ChatListener;
 import dev.spa.insight.listener.CombatListener;
@@ -37,6 +38,7 @@ public class InsightPlugin extends JavaPlugin {
 
     private static final String LAST_EXPORT_KEY = "last_exported_week";
 
+    private JobsAudit jobsAudit;
     private Database database;
     private ExecutorService writer;
     private SessionTracker tracker;
@@ -92,6 +94,12 @@ public class InsightPlugin extends JavaPlugin {
                 mainWorldFolder(), serverRoot(pluginsFolder), getLogger());
 
         registerListeners();
+        if (getConfig().getBoolean("jobs-audit.enabled", true)) {
+            jobsAudit = new JobsAudit(this, database, tracker, writer);
+            jobsAudit.start();
+        } else {
+            writer.execute(() -> database.recordSourceStatus("jobs_audit", "disabled", "jobs-audit.enabled=false"));
+        }
         registerCommand();
         scheduleTasks();
 
@@ -111,6 +119,7 @@ public class InsightPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (jobsAudit != null) jobsAudit.close();
         if (writer != null) {
             writer.shutdown();
             try {

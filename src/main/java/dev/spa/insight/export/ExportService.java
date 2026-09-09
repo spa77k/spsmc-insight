@@ -1,6 +1,7 @@
 package dev.spa.insight.export;
 
 import dev.spa.insight.InsightConfig;
+import dev.spa.insight.jobs.JobsAuditExport;
 import dev.spa.insight.milestone.Milestones;
 import dev.spa.insight.source.SourceRegistry;
 import dev.spa.insight.source.SourceStatus;
@@ -75,6 +76,8 @@ public class ExportService {
         written.add(writeDaily(directory, weekKey));
         written.add(writePlayers(directory));
         written.add(writeMilestones(directory));
+        written.addAll(JobsAuditExport.write(database, directory, from, to));
+        warnings.add("Jobs: jobs-summary.jsonのlimitationsを確認してください。予定額・支払いイベント額は実収入ではありません。");
 
         Map<String, Object> cohorts = new CohortCalculator(database).build(now);
         written.add(writeJson(new File(directory, "cohorts.json"), cohorts));
@@ -468,7 +471,7 @@ public class ExportService {
         root.put("warnings", warnings);
         root.put("reading_order", List.of("summary.json", "cohorts.json", "funnel.json", "daily.jsonl",
                 "players.jsonl", "milestones.jsonl", "sessions.jsonl", "events.jsonl", "breakdown.jsonl",
-                "sources.json"));
+                "sources.json", "jobs-summary.json", "jobs-audit.jsonl"));
         return root;
     }
 

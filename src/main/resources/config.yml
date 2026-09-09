@@ -67,3 +67,7 @@ tracking:
   interactions: true
   # マテリアル別の内訳を上位いくつまで残すか。0で内訳を残さない。
   material-breakdown-top: 40
+
+# Jobs本体を変更しない受動監査。残高照合はJobs 5.2.6.6 + Essentials 2.22.0でのみ有効。
+jobs-audit:
+  enabled: true

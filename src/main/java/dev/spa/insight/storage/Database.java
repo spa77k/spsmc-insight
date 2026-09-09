@@ -1,6 +1,7 @@
 package dev.spa.insight.storage;
 
 import org.bukkit.plugin.Plugin;
+import dev.spa.insight.jobs.JobsAuditStore;
 
 import java.io.File;
 import java.sql.Connection;
@@ -15,7 +16,7 @@ import java.sql.Statement;
  */
 public class Database {
 
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
 
     private final Plugin plugin;
     private Connection connection;
@@ -182,6 +183,7 @@ public class Database {
                     bytes INTEGER NOT NULL
                 )
                 """);
+            JobsAuditStore.migrate(statement);
             statement.execute("CREATE INDEX IF NOT EXISTS idx_sessions_uuid ON sessions (uuid)");
             statement.execute("CREATE INDEX IF NOT EXISTS idx_sessions_join ON sessions (join_at)");
             statement.execute("CREATE INDEX IF NOT EXISTS idx_sessions_day ON sessions (day)");
