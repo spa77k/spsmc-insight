@@ -78,6 +78,9 @@ public final class JobsAudit implements Listener {
             throws ClassNotFoundException {
         Class<? extends Event> type = Class.forName(name, true, owner.getClass().getClassLoader()).asSubclass(Event.class);
         plugin.getServer().getPluginManager().registerEvent(type, this, priority, (listener, event) -> {
+            // Jobs BaseEvent shares its HandlerList with sibling event classes.
+            // A custom EventExecutor must filter them before reading payment fields.
+            if (!type.isInstance(event)) return;
             try { handler.accept(event); }
             catch (RuntimeException e) { plugin.getLogger().warning("Jobs audit observation failed: " + e); }
         }, plugin, false);

@@ -1,5 +1,27 @@
 # ローカル検証結果 — 2026-09-09
 
+## 2026-09-10: 共有HandlerListによる誤配送の修正
+
+JobsAuditのカスタムEventExecutorで登録対象の型を確認するように変更しました。
+Jobs 5.2.6.6のBaseEventを継承するイベントはHandlerListを共有するため、
+この確認がないとPrePaymentリスナーに経験値・チャンク移動等も配送され、
+存在しないgetAmountを呼んでWARNになっていました。
+
+単体テスト4件が成功。実JobsのExpGain、InstancePayment、ChunkChange、
+BlockOwnershipRegisterイベントを隔離サーバーで発火し、監査WARN・DB書き込みエラーがなく、
+既存の支払い・キャンセル・照合・週次出力の検証もPASS（監査行10件）でした。
+成果物: `target/jobs-probe-yp4986s7/verification.json` と `probe.log`。
+JDK 25で既存Mockitoを動かすため、実行時のみ
+`JAVA_TOOL_OPTIONS=-Dnet.bytebuddy.experimental=true`を使用しました。
+
+修正版JAR: `target/spsmc-insight-0.1.0.jar`
+SHA-256: `693faf3a6338984958c0b6ef998c1878807ed6a54c77e4a69522b1f5b25bb2d1`
+
+この修正では非同期入金の確定判定、職業別実収入、上限理由の取得範囲は変わりません。
+検証専用コンテナのみ自動終了し、リモートには接続・変更・停止・再起動していません。
+
+## 初回検証
+
 結果: PASS（試験実装の観測・除外ルール）。当初の完全監査の完成条件の達成を意味しません。
 
 環境は既存のローカルサーバーからコピーしたPaper 26.1.2-74、Jobs 5.2.6.6、

@@ -54,7 +54,18 @@ public final class JobsAuditProbe extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().callEvent(pre);
             // Re-dispatching the same object tests identity deduplication, not a second action.
             Bukkit.getPluginManager().callEvent(pre);
+            // Real Jobs sibling events share BaseEvent's HandlerList with PrePayment.
+            // They must neither warn nor become audit payment rows.
+            var block = Bukkit.getWorlds().get(0).getBlockAt(0, 64, 0);
+            Bukkit.getPluginManager().callEvent(new com.gamingmesh.jobs.api.JobsExpGainEvent(
+                    preUser.getBase(), Jobs.getJob("Miner"), 3, block, null, null, action));
+            Bukkit.getPluginManager().callEvent(new com.gamingmesh.jobs.api.JobsChunkChangeEvent(
+                    preUser.getBase(), block.getChunk(), block.getChunk()));
+            Bukkit.getPluginManager().callEvent(new com.gamingmesh.jobs.api.JobsBlockOwnershipRegisterEvent(
+                    preUser.getBase(), block));
             Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                Bukkit.getPluginManager().callEvent(new com.gamingmesh.jobs.api.JobsInstancePaymentEvent(
+                        preUser.getBase(), money(7)));
                 Jobs.getEconomy().pay(new BufferedPayment(users.get("cancelled").getBase(), money(8)));
                 Jobs.getEconomy().payAll();
             });
