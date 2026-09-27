@@ -244,6 +244,15 @@ ARG INSIGHT_SHA256=<リリース作成後に算出する>
 - **`first_discord_link` の到達時刻は、連携を最初に観測した時刻です。** MCAuth・DiscordSRV のどちらもリンク日時を保持していないため、実際に連携した時刻ではありません
 - **同時接続の多いサーバーでは未検証です。** 移動イベントの加算処理は軽くしていますが、規模が大きい場合は `tracking.movement` を落として様子を見てください
 
+## 自動化装置の検出記録
+
+EcoLifeAssist が運営用Discordへ通知した「自動化装置の疑い」（`plugins/EcoLifeAssist/automation.db`）を読み取り専用で開き、週次の出力に含めます。
+
+- `automation.jsonl`: その週に検出した場所。座標、BlueMapのURL、土地の持ち主（GriefPrevention）、装置を置いた人と設置日時（CoreProtect）、動きの内訳（`transfer` / `pickup` / `piston` / `dispense` / `mob_death`）
+- `summary.json` の `automation`: 今週と累計の件数、複数の場所で名前が出た土地の持ち主・設置者（`repeat_claim_owners` / `repeat_placers`）
+
+通知は1場所1回なので、同じ名前が複数の場所で出ていれば繰り返し作っている疑いがあります。いずれも運営が確認するための候補で、違反の確定ではありません。`automation.db` が無ければ `available: false` を出して読み飛ばします。
+
 ## Jobsの支払い監査（試験実装）
 
 Jobs本体を変更せず、予定報酬・合算支払い・Essentials残高照合をSQLiteと週次出力へ保存します。

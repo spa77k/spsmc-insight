@@ -78,6 +78,10 @@ public class ExportService {
         written.add(writeMilestones(directory));
         written.addAll(JobsAuditExport.write(database, directory, from, to));
         warnings.add("Jobs: jobs-summary.jsonのlimitationsを確認してください。予定額・支払いイベント額は実収入ではありません。");
+        Map<String, Object> automation = AutomationExport.write(dataFolder.getParentFile(), directory, from, to);
+        if (automation.get("file") != null) {
+            written.add(new File(directory, (String) automation.get("file")));
+        }
 
         Map<String, Object> cohorts = new CohortCalculator(database).build(now);
         written.add(writeJson(new File(directory, "cohorts.json"), cohorts));
@@ -86,6 +90,7 @@ public class ExportService {
 
         Map<String, Object> summary = buildSummary(weekKey, from, to, now, totals, materialTotals, commandTotals,
                 activePlayers, newPlayers, written, warnings);
+        summary.put("automation", automation);
         File summaryFile = writeJson(new File(directory, "summary.json"), summary);
         written.add(summaryFile);
 
@@ -471,7 +476,7 @@ public class ExportService {
         root.put("warnings", warnings);
         root.put("reading_order", List.of("summary.json", "cohorts.json", "funnel.json", "daily.jsonl",
                 "players.jsonl", "milestones.jsonl", "sessions.jsonl", "events.jsonl", "breakdown.jsonl",
-                "sources.json", "jobs-summary.json", "jobs-audit.jsonl"));
+                "sources.json", "jobs-summary.json", "jobs-audit.jsonl", "automation.jsonl"));
         return root;
     }
 
