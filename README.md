@@ -8,7 +8,7 @@ PaperMC サーバー向けの、プレイヤー行動を記録して**定着率�
 
 - Minecraft サーバー: PaperMC
 - 対象 API: Paper API `1.20.6-R0.1-SNAPSHOT`
-- Java: 21（実行は Java 25 の Paper 26.1.2 を想定）
+- Java: 21（実行は Java 25 の Paper 26.1.2〜26.3 を想定）
 - ビルドツール: Maven
 - 出力形式: Bukkit/Paper プラグイン用の `.jar`
 - メインクラス: `dev.spa.insight.InsightPlugin`
