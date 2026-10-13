@@ -1,5 +1,8 @@
 package dev.spa.insight.source;
 
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteException;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -21,7 +24,27 @@ public final class SqliteReader {
         if (file == null || !file.isFile()) {
             throw new SQLException("ファイルがありません: " + file);
         }
-        return DriverManager.getConnection("jdbc:sqlite:file:" + file.getAbsolutePath() + "?mode=ro&immutable=1");
+        SQLiteConfig config = new SQLiteConfig();
+        config.setReadOnly(true);
+        config.setBusyTimeout(1000);
+        // 稼働中のDBは変更されるため immutable / nolock は使わない。
+        // SQLite本来のロックとWAL読み取りを保ち、認証元のDB内容は変更しない。
+        // URIとしてエスケープし、パス内の ? / # / % を接続オプションと誤認させない。
+        return DriverManager.getConnection("jdbc:sqlite:" + file.toURI().toASCIIString() + "?mode=ro",
+                config.toProperties());
+    }
+
+    /** 他のDBエラーを再試行で隠さず、SQLiteの一時的なロック競合だけを識別する。 */
+    public static boolean isTransientLock(Throwable error) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLiteException sqlite) {
+                int primaryCode = sqlite.getResultCode().code & 0xff;
+                if (primaryCode == 5 || primaryCode == 6) { // SQLITE_BUSY / SQLITE_LOCKED
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

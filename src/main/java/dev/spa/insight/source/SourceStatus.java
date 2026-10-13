@@ -3,7 +3,11 @@ package dev.spa.insight.source;
 /**
  * 連携ソースの状態。読めなかった理由をそのままエクスポートへ載せる。
  */
-public record SourceStatus(String id, String status, String detail) {
+public record SourceStatus(String id, String status, String detail, boolean retryable) {
+
+    public SourceStatus(String id, String status, String detail) {
+        this(id, status, detail, false);
+    }
 
     public static final String AVAILABLE = "available";
     public static final String UNAVAILABLE = "unavailable";
@@ -24,6 +28,10 @@ public record SourceStatus(String id, String status, String detail) {
 
     public static SourceStatus error(String id, String detail) {
         return new SourceStatus(id, ERROR, detail);
+    }
+
+    public static SourceStatus error(String id, Throwable error) {
+        return new SourceStatus(id, ERROR, String.valueOf(error), SqliteReader.isTransientLock(error));
     }
 
     public boolean usable() {

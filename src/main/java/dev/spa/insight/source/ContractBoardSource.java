@@ -36,7 +36,7 @@ public class ContractBoardSource implements SourceAdapter {
             }
             return SourceStatus.available(id(), database.getPath());
         } catch (Exception e) {
-            return SourceStatus.error(id(), e.getMessage());
+            return SourceStatus.error(id(), e);
         }
     }
 

@@ -95,7 +95,7 @@ Paper API は `provided` です。SQLite ドライバ（`sqlite-jdbc`）だけ�
 | `coreprotect` | `plugins/CoreProtect/database.db` | 過去の活動日（遡及専用。定期取り込みはしない） |
 | `essentials` | `plugins/Essentials/userdata/<UUID>.yml` | 所持金、ホーム数、最終ログイン・ログアウト |
 | `mclevel` | `plugins/McLevel/data.yml` | レベル、アクティブ秒 |
-| `mcauth` | `plugins/MCAuth/data.yml` | Discord 連携の有無とID |
+| `mcauth` | `plugins/MCAuth/mcauth.db`（DBが無い旧版のみ `data.yml`） | Discord 連携の有無とID |
 | `contractboard` | `plugins/ContractBoard/irai.db` | 依頼の投稿数・受注数と初回時刻 |
 | `vault` | ServicesManager | 残高 |
 | `luckperms` | ServicesManager | 主グループ |
@@ -109,12 +109,25 @@ Paper API は `provided` です。SQLite ドライバ（`sqlite-jdbc`）だけ�
 
 **他プラグインのデータベースへは書き込みません。**読み取り専用で開きます。
 
+MCAuth は現在の `authenticated_players` テーブルを優先します。DBが存在して読み取り・
+スキーマ確認に失敗した場合は `error` とし、古い `data.yml` に残った連携を採用しません。
+一度DBを検出した後にファイルが消えた場合も同様です。旧YAMLの構文・構造エラーも欠測として扱います。
+連携が解除されたプレイヤーは `linked: false` とし、前回のDiscord ID・名前を空に更新します。
+
+稼働中の外部SQLiteは `mode=ro` で開き、`immutable` や `nolock` は指定しません。
+これによりWAL内のコミット済みデータとSQLite本来のロックを尊重します。ロック待ちは最大1秒です。
+DB内容への書き込み・journal mode変更・チェックポイントは行いませんが、WAL用の `-wal` / `-shm`
+ファイルへのアクセスはSQLiteの仕様上必要です。サイドカーファイルを読めず、必要な作成もできない場合は
+欠測になります。詳細は [SQLiteの読み取り専用WAL](https://www.sqlite.org/wal.html#read_only_databases) を参照してください。
+
 ### 読めなかったとき
 
 連携先が未導入、無効、バージョン差でAPIが変わった、といった場合は**その項目だけを欠測**として続行します。サーバーは止まりません。
 
 - `sources.json` に `status`（`available` / `unavailable` / `disabled` / `error`）と理由が残ります
-- 取り込みが例外で落ちたソースは、その場で `error` に落として以降の周回では呼びません
+- 取り込みが例外で落ちたソースは、その場で `error` に落として以降の周回では呼びません。
+  SQLiteの一時的なロック競合（`SQLITE_BUSY` / `SQLITE_LOCKED`）だけは、通常の次回収集時に
+  接続・スキーマを再確認して復帰します。起動時の確認でロックに当たった場合も同様です。
 
 外部APIはコンパイル時に依存せず、すべてリフレクションかファイル読み取りで叩いています。相手のプラグインを更新してもこのプラグインのビルドは壊れません。
 

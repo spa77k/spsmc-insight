@@ -79,7 +79,7 @@ public class SourceRegistry {
             try {
                 status = adapter.probe();
             } catch (RuntimeException | LinkageError e) {
-                status = SourceStatus.error(adapter.id(), String.valueOf(e));
+                status = SourceStatus.error(adapter.id(), e);
             }
         }
         statuses.put(adapter.id(), status);
@@ -113,15 +113,24 @@ public class SourceRegistry {
         long now = System.currentTimeMillis();
         for (SourceAdapter adapter : adapters) {
             SourceStatus status = statuses.get(adapter.id());
-            if (status == null || !status.usable()) {
+            if (status == null || (!status.usable() && !status.retryable())) {
                 continue;
             }
             RecordingSink sink = new RecordingSink(targets, now, adapter.id());
             try {
+                if (status.retryable()) {
+                    // ループ内で連続再試行せず、通常の収集間隔で再確認する。
+                    status = adapter.probe();
+                    statuses.put(adapter.id(), status);
+                    database.recordSourceStatus(status.id(), status.status(), status.detail());
+                    if (!status.usable()) {
+                        continue;
+                    }
+                }
                 adapter.collect(sink);
                 sink.commit();
             } catch (Exception | LinkageError e) {
-                SourceStatus failed = SourceStatus.error(adapter.id(), String.valueOf(e));
+                SourceStatus failed = SourceStatus.error(adapter.id(), e);
                 statuses.put(adapter.id(), failed);
                 database.recordSourceStatus(failed.id(), failed.status(), failed.detail());
                 logger.warning("連携ソースの取り込みに失敗しました (" + adapter.id() + "): " + e);
