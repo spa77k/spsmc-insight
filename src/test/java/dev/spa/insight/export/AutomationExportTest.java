@@ -25,9 +25,9 @@ class AutomationExportTest {
 
     @Test void exportsWeekRowsAndRepeatNames() throws Exception {
         File plugins = folder.resolve("plugins").toFile();
-        File eco = new File(plugins, "EcoLifeAssist");
+        File eco = new File(plugins, "AutomationWatch");
         assertTrue(eco.mkdirs());
-        // EcoLifeAssist の AutomationStore と同じ表
+        // AutomationWatch の AutomationStore と同じ表
         try (Connection c = DriverManager.getConnection("jdbc:sqlite:" + new File(eco, "automation.db"));
              Statement s = c.createStatement()) {
             s.execute("CREATE TABLE detections (id INTEGER PRIMARY KEY AUTOINCREMENT,"

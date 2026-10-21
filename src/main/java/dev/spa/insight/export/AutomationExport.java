@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * EcoLifeAssist が残した自動化装置の検出記録（plugins/EcoLifeAssist/automation.db）を週次の出力に含める。
- * 読み取り専用で開き、書き込みは行わない。列名は EcoLifeAssist の AutomationStore と揃えている。
+ * AutomationWatch が残した自動化装置の検出記録（plugins/AutomationWatch/automation.db）を週次の出力に含める。
+ * 読み取り専用で開き、書き込みは行わない。列名は AutomationWatch の AutomationStore と揃えている。
  */
 public final class AutomationExport {
 
@@ -28,10 +28,10 @@ public final class AutomationExport {
     public static Map<String, Object> write(File pluginsFolder, File directory, long from, long to)
             throws IOException {
         Map<String, Object> summary = Json.obj();
-        File database = new File(new File(pluginsFolder, "EcoLifeAssist"), "automation.db");
+        File database = new File(new File(pluginsFolder, "AutomationWatch"), "automation.db");
         if (!database.isFile()) {
             summary.put("available", false);
-            summary.put("reason", "automation.db がありません（EcoLifeAssist の検出が無効、または未検出）");
+            summary.put("reason", "automation.db がありません（AutomationWatch の検出が無効、または未検出）");
             return summary;
         }
         File file = new File(directory, "automation.jsonl");

@@ -259,7 +259,7 @@ ARG INSIGHT_SHA256=<リリース作成後に算出する>
 
 ## 自動化装置の検出記録
 
-EcoLifeAssist が運営用Discordへ通知した「自動化装置の疑い」（`plugins/EcoLifeAssist/automation.db`）を読み取り専用で開き、週次の出力に含めます。
+AutomationWatch が運営用Discordへ通知した「自動化装置の疑い」（`plugins/AutomationWatch/automation.db`）を読み取り専用で開き、週次の出力に含めます。
 
 - `automation.jsonl`: その週に検出した場所。座標、BlueMapのURL、土地の持ち主（GriefPrevention）、装置を置いた人と設置日時（CoreProtect）、動きの内訳（`transfer` / `pickup` / `piston` / `dispense` / `mob_death`）
 - `summary.json` の `automation`: 今週と累計の件数、複数の場所で名前が出た土地の持ち主・設置者（`repeat_claim_owners` / `repeat_placers`）
