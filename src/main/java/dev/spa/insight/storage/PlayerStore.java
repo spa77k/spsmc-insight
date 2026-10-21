@@ -70,14 +70,6 @@ public class PlayerStore {
         }
     }
 
-    public boolean hasPlayedBefore(UUID uuid, long beforeMillis) throws SQLException {
-        try (PreparedStatement statement = database.prepare(
-                "SELECT 1 FROM sessions WHERE uuid = ? AND join_at < ? LIMIT 1", uuid.toString(), beforeMillis);
-             ResultSet result = statement.executeQuery()) {
-            return result.next();
-        }
-    }
-
     public int countPreviousSessions(UUID uuid, long beforeMillis) throws SQLException {
         try (PreparedStatement statement = database.prepare(
                 "SELECT COUNT(*) FROM sessions WHERE uuid = ? AND join_at < ?", uuid.toString(), beforeMillis);

@@ -13,10 +13,6 @@ public class InsightConfig {
         this.config = config;
     }
 
-    public long flushIntervalMillis() {
-        return Math.max(5L, config.getLong("flush-interval-seconds", 60L)) * 1000L;
-    }
-
     public long flushIntervalTicks() {
         return Math.max(5L, config.getLong("flush-interval-seconds", 60L)) * 20L;
     }
