@@ -94,7 +94,7 @@ public class InsightPlugin extends JavaPlugin {
                 mainWorldFolder(), serverRoot(pluginsFolder), getLogger());
 
         registerListeners();
-        if (getConfig().getBoolean("jobs-audit.enabled", true)) {
+        if (insightConfig.jobsAuditEnabled()) {
             jobsAudit = new JobsAudit(this, database, tracker, writer);
             jobsAudit.start();
         } else {
