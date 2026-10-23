@@ -43,17 +43,17 @@ Paper API は `provided` です。SQLite ドライバ（`sqlite-jdbc`）だけ�
 
 セッションごとに次を数えます（`config.yml` の `tracking` で分類ごとに切れます）。
 
-`blocks_broken` / `blocks_placed` / `ores_mined` / `items_crafted` / `items_picked_up` / `items_dropped` / `items_consumed` / `chat_messages` / `chat_characters` / `commands_used` / `deaths` / `respawns` / `kills_player` / `kills_mob` / `damage_taken` / `damage_dealt` / `inventory_clicks` / `containers_opened` / `interactions` / `advancements` / `world_changes` / `teleports` / `portal_uses` / `beds_entered` / `fish_caught` / `animals_tamed` / `animals_bred` / `villager_trades` / `books_edited` / `distance_cm` / `distance_vehicle_cm` / `distance_flight_cm`
+`blocks_broken` / `blocks_placed` / `ores_mined` / `items_crafted` / `items_picked_up` / `items_dropped` / `items_consumed` / `chat_messages` / `chat_characters` / `commands_used` / `deaths` / `respawns` / `kills_player` / `kills_mob` / `damage_taken` / `damage_dealt` / `inventory_clicks` / `containers_opened` / `interactions` / `advancements` / `world_changes` / `teleports` / `portal_uses` / `beds_entered` / `fish_caught` / `animals_tamed` / `animals_bred` / `villager_trades` / `shops_created` / `shop_trades` / `shop_items_traded` / `books_edited` / `distance_cm` / `distance_vehicle_cm` / `distance_flight_cm`
 
 ダメージ量は小数を避けるため100倍の整数で入ります。距離はセンチメートルです。
 
-加えて、内訳（`break` / `place` / `craft` / `command` / `death_cause` / `container` / `mob_kill` / `advancement` など）を種別ごとに残します。1セッションあたりの内訳は上位 `material-breakdown-top` 件（既定40件）だけ残します。
+加えて、内訳（`break` / `place` / `craft` / `command` / `death_cause` / `container` / `mob_kill` / `advancement` / `shop_trade` など）を種別ごとに残します。1セッションあたりの内訳は上位 `material-breakdown-top` 件（既定40件）だけ残します。
 
 **チャットの文面とコマンドの引数は保存しません。** 件数、文字数、コマンド名だけを残します。
 
 ### マイルストーン（初回到達）
 
-`first_join` / `first_interact` / `first_block_break` / `first_block_place` / `first_craft` / `first_chat` / `first_advancement` / `first_ore_mined` / `first_death` / `first_world_change` / `first_resource_world` / `first_build_world` / `first_discord_link` / `reached_level_1` / `first_land_claim` / `first_job_joined` / `first_shop_created` / `first_contract_posted` / `first_contract_accepted` / `second_session` / `returned_next_day` / `playtime_1h` / … など。
+`first_join` / `first_interact` / `first_block_break` / `first_block_place` / `first_craft` / `first_chat` / `first_advancement` / `first_ore_mined` / `first_death` / `first_world_change` / `first_resource_world` / `first_build_world` / `first_discord_link` / `reached_level_1` / `first_land_claim` / `first_job_joined` / `first_shop_created` / `first_shop_trade` / `first_contract_posted` / `first_contract_accepted` / `second_session` / `returned_next_day` / `playtime_1h` / … など。
 
 到達時刻は**最も古い記録が残ります**。あとから同じ項目を観測しても上書きされません。
 
@@ -106,6 +106,13 @@ Paper API は `provided` です。SQLite ドライバ（`sqlite-jdbc`）だけ�
 | `discordsrv` | DiscordSRV API | 連携済み Discord ID |
 | `worldguard` | WorldGuard API | 所有リージョン数 |
 | `multiverse` | Bukkit / Multiverse-Core | 現在ワールドと環境 |
+
+QuickShop-Hikari は、上の定期取り込みとは別に、ショップの作成と取引をイベントで記録します（`sources.quickshop` が true のとき）。
+
+- ショップの作成が確定したとき、作った人に `shops_created` を数え、`first_shop_created` を記録します
+- ショップで売り買いが成立したとき、ショップを使った人（店主ではない側）に `shop_trades` と `shop_items_traded`（個数）を数え、`first_shop_trade` を記録します。内訳 `shop_trade` には店の種類（`SELLING` / `BUYING`）ごとの回数が入ります
+- 回数は接続中のセッションにだけ入ります。初回到達はセッションが無くても記録します
+- 受信の状態は `sources.json` の `quickshop_events` に残ります
 
 **他プラグインのデータベースへは書き込みません。**読み取り専用で開きます。
 

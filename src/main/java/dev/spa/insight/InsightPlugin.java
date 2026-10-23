@@ -10,6 +10,7 @@ import dev.spa.insight.listener.CombatListener;
 import dev.spa.insight.listener.InventoryListener;
 import dev.spa.insight.listener.MovementListener;
 import dev.spa.insight.listener.ProgressionListener;
+import dev.spa.insight.listener.QuickShopListener;
 import dev.spa.insight.listener.SessionListener;
 import dev.spa.insight.milestone.MilestoneRecorder;
 import dev.spa.insight.source.SourceRegistry;
@@ -99,6 +100,11 @@ public class InsightPlugin extends JavaPlugin {
             jobsAudit.start();
         } else {
             writer.execute(() -> database.recordSourceStatus("jobs_audit", "disabled", "jobs-audit.enabled=false"));
+        }
+        if (insightConfig.sourceEnabled("quickshop")) {
+            new QuickShopListener(this, tracker, database, writer).start();
+        } else {
+            writer.execute(() -> database.recordSourceStatus("quickshop_events", "disabled", "sources.quickshop=false"));
         }
         registerCommand();
         scheduleTasks();

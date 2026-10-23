@@ -2,6 +2,12 @@ package dev.spa.insight.source;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 他プラグインのAPIをコンパイル時依存なしで叩くための最小限の道具。
@@ -64,8 +70,8 @@ public final class Reflect {
         if (type == null) {
             return null;
         }
-        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
-            for (Method candidate : current.getMethods()) {
+        for (Class<?> current : searchOrder(type)) {
+            for (Method candidate : methodsOf(current)) {
                 if (!candidate.getName().equals(method) || candidate.getParameterCount() != arguments.length) {
                     continue;
                 }
@@ -81,6 +87,39 @@ public final class Reflect {
             }
         }
         return null;
+    }
+
+    /**
+     * 具象クラスとその親を先に、実装しているインターフェースを後に並べる。
+     * 具象クラスのメソッド一覧が読めないときも、インターフェース経由で呼べるようにするため。
+     */
+    static List<Class<?>> searchOrder(Class<?> type) {
+        Set<Class<?>> order = new LinkedHashSet<>();
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            order.add(current);
+        }
+        Deque<Class<?>> pending = new ArrayDeque<>(order);
+        while (!pending.isEmpty()) {
+            for (Class<?> parent : pending.poll().getInterfaces()) {
+                if (order.add(parent)) {
+                    pending.add(parent);
+                }
+            }
+        }
+        return new ArrayList<>(order);
+    }
+
+    /**
+     * getMethods() は全メソッドの引数・戻り値の型を解決する。導入されていないプラグインの型
+     * （QuickShop の getQuickShopPAPI() が返す PlaceholderAPI の型など）が1つでもあると
+     * NoClassDefFoundError になるので、そのクラスは飛ばす。
+     */
+    private static Method[] methodsOf(Class<?> type) {
+        try {
+            return type.getMethods();
+        } catch (LinkageError e) {
+            return new Method[0];
+        }
     }
 
     /**

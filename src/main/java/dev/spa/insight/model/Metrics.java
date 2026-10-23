@@ -33,6 +33,9 @@ public final class Metrics {
     public static final String ANIMALS_TAMED = "animals_tamed";
     public static final String ANIMALS_BRED = "animals_bred";
     public static final String VILLAGER_TRADES = "villager_trades";
+    public static final String SHOPS_CREATED = "shops_created";
+    public static final String SHOP_TRADES = "shop_trades";
+    public static final String SHOP_ITEMS_TRADED = "shop_items_traded";
     public static final String BOOKS_EDITED = "books_edited";
     public static final String DISTANCE_CM = "distance_cm";
     public static final String DISTANCE_VEHICLE_CM = "distance_vehicle_cm";
@@ -43,6 +46,7 @@ public final class Metrics {
     public static final String ACTION_CRAFT = "craft";
     public static final String ACTION_DEATH_CAUSE = "death_cause";
     public static final String ACTION_COMMAND = "command";
+    public static final String ACTION_SHOP_TRADE = "shop_trade";
 
     private Metrics() {
     }
